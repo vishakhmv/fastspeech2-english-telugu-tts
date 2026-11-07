@@ -1,0 +1,109 @@
+language: telugu
+
+paths:
+  dataset: "../IndicTTS_Telugu"
+  workdir: "./workdir"
+  preprocessed: "./workdir/preprocessed"
+  checkpoints: "./checkpoints"
+  vocoder: "../fastspeech2/hifigan/generator_universal.pth.tar"
+
+data:
+  speaker: "male"
+  audio_column: "audio"
+  gender_value: 1
+  min_duration: 1.5
+  max_duration: 16.0
+  chars_per_second: [7.5, 16.5]
+  mfa_sampling_rate: 16000
+  train_hours: 5.0
+  val_hours: 1.0
+  min_alignment_percentile: 5
+  seed: 1234
+  sessions:
+    male_a: [[1, 1019], [3276, 4533]]
+    male_b: [[1020, 1384], [2843, 3275]]
+    male_c: [[1385, 2332]]
+    male_d: [[2333, 2842]]
+
+preprocessing:
+  audio:
+    sampling_rate: 22050
+    max_wav_value: 32768.0
+    target_db: -23.0
+    peak_limit: 0.95
+  stft:
+    filter_length: 1024
+    hop_length: 256
+    win_length: 1024
+  mel:
+    n_mel_channels: 80
+    mel_fmin: 0
+    mel_fmax: 8000
+  pitch:
+    first_pass_range: [50, 700]
+    floor_factor: 0.65
+    ceiling_factor: 2.2
+    normalization: true
+  energy:
+    normalization: true
+  stats_percentile: [0.5, 99.5]
+
+model:
+  transformer:
+    encoder_layer: 4
+    encoder_head: 2
+    encoder_hidden: 256
+    decoder_layer: 6
+    decoder_head: 2
+    decoder_hidden: 256
+    conv_filter_size: 1024
+    conv_kernel_size: [9, 1]
+    encoder_dropout: 0.2
+    decoder_dropout: 0.2
+  variance_predictor:
+    filter_size: 256
+    kernel_size: 3
+    dropout: 0.5
+    encoder_grad: 0.1
+  variance_embedding:
+    kind: "continuous"
+    kernel_size: 3
+    n_bins: 256
+  multi_speaker: true
+  max_seq_len: 1600
+
+train:
+  optimizer:
+    batch_size: 16
+    betas: [0.9, 0.98]
+    eps: 0.000000001
+    weight_decay: 0.0
+    grad_clip_thresh: 1.0
+    grad_acc_step: 1
+    warm_up_step: 4000
+    anneal_steps: [50000, 58000, 62000]
+    anneal_rate: 0.3
+  step:
+    total_step: 66000
+    log_step: 100
+    val_step: 1000
+    save_step: 2000
+    synth_step: 10000
+    keep_every: 20000
+  amp: true
+  group_size: 4
+  num_workers: 2
+
+inference:
+  speaker: "male_a"
+  sentences:
+    - id: "T1"
+      text: "న్యూరోఫార్మకోలాజికల్ పరిశోధనలో నూతన ఔషధాల ప్రభావాన్ని విశ్లేషించారు."
+    - id: "T2a"
+      text: "తాడుపై అతని పట్టు చాలా బలంగా ఉంది."
+    - id: "T2b"
+      text: "ఆమె పట్టు చీరను ధరించి వేడుకకు వచ్చింది."
+    - id: "T3"
+      text: "పులి అడ  విలో నిశ్శబ్దంగా నడిచింది."
+    - id: "T4"
+      text: "ఈ సమావేశం 2026 నవంబర్ 12వ తేదీ ఉదయం 10:45 గంటలకు ప్రారంభమవుతుంది, సమయానికి సిద్ధంగా ఉంచండి."

@@ -1,0 +1,14 @@
+torch>=2.3
+torchaudio>=2.3
+numpy>=1.26
+scipy>=1.11
+librosa>=0.10
+soundfile>=0.12
+pyyaml>=6.0
+pandas>=2.0
+pyarrow>=14.0
+matplotlib>=3.7
+tgt>=1.4
+praat-parselmouth>=0.4.3
+nltk>=3.9
+g2p-en>=2.1.0

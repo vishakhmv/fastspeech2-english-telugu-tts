@@ -1,0 +1,116 @@
+language: english
+
+paths:
+  dataset: "../Svarah"
+  workdir: "./workdir"
+  preprocessed: "./workdir/preprocessed"
+  checkpoints: "./checkpoints"
+  vocoder: "../fastspeech2/hifigan/generator_universal.pth.tar"
+  mfa_dictionary: "./workdir/mfa_models/english_us_arpa.dict"
+  mfa_acoustic_model: "./workdir/mfa_models/english_us_arpa.zip"
+
+data:
+  audio_column: "audio_filepath"
+  min_duration: 1.0
+  max_duration: 18.0
+  words_per_second: [0.6, 4.6]
+  max_clip_fraction: 0.002
+  min_voiced_fraction: 0.2
+  quality_weights:
+    si_sdr: 0.35
+    pesq: 0.25
+    stoi: 0.15
+    snr_proxy: 0.15
+    hf_ratio: 0.10
+  pool_drop_percent: 12
+  min_alignment_percentile: 3
+  alignment_weight: 0.5
+  min_speaker_seconds: 90
+  train_hours: 5.0
+  val_hours: 1.0
+  seed: 1234
+
+preprocessing:
+  audio:
+    sampling_rate: 22050
+    max_wav_value: 32768.0
+    target_db: -23.0
+    peak_limit: 0.95
+  stft:
+    filter_length: 1024
+    hop_length: 256
+    win_length: 1024
+  mel:
+    n_mel_channels: 80
+    mel_fmin: 0
+    mel_fmax: 8000
+  pitch:
+    first_pass_range: [50, 700]
+    floor_factor: 0.65
+    ceiling_factor: 2.2
+    normalization: true
+  energy:
+    normalization: true
+  stats_percentile: [0.5, 99.5]
+
+model:
+  transformer:
+    encoder_layer: 4
+    encoder_head: 2
+    encoder_hidden: 256
+    decoder_layer: 6
+    decoder_head: 2
+    decoder_hidden: 256
+    conv_filter_size: 1024
+    conv_kernel_size: [9, 1]
+    encoder_dropout: 0.2
+    decoder_dropout: 0.2
+  variance_predictor:
+    filter_size: 256
+    kernel_size: 3
+    dropout: 0.5
+    encoder_grad: 0.1
+  variance_embedding:
+    kind: "continuous"
+    kernel_size: 3
+    n_bins: 256
+  multi_speaker: true
+  max_seq_len: 1600
+
+train:
+  optimizer:
+    batch_size: 16
+    betas: [0.9, 0.98]
+    eps: 0.000000001
+    weight_decay: 0.0
+    grad_clip_thresh: 1.0
+    grad_acc_step: 1
+    warm_up_step: 4000
+    anneal_steps: [30000, 45000, 55000]
+    anneal_rate: 0.3
+  step:
+    total_step: 60000
+    log_step: 100
+    val_step: 1000
+    save_step: 2000
+    synth_step: 10000
+    keep_every: 20000
+  amp: true
+  group_size: 4
+  num_workers: 2
+
+inference:
+  speaker: "S006"
+  speech_duration_scale: 1.077593722755013
+  pause_duration_scale: 1.819422179473478
+  sentences:
+    - id: "E1"
+      text: "The antidisestablishmentarianism movement gained considerable momentum during the parliamentary proceedings."
+    - id: "E2a"
+      text: "The orchestra's conduct during the ceremony was praised by the audience."
+    - id: "E2b"
+      text: "The researchers will conduct an experiment to evaluate the proposed method."
+    - id: "E3"
+      text: "The rhyth  m of the orchestra changed unexpectedly."
+    - id: "E4"
+      text: "The meeting will start at 10:45 AM on 12 November 2026, so andaroo should arrive on time."
